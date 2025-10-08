@@ -1,18 +1,33 @@
+// File: tests/example.spec.ts
 import { test, expect } from '@playwright/test';
 
-test('has title', async ({ page }) => {
-  await page.goto('https://playwright.dev/');
+test('form interaction', async ({ page }) => {
+  // เปิดเว็บของคุณ (เปลี่ยน URL ให้ตรงกับเว็บจริง)
+  await page.goto('http://localhost:3000');
 
-  // Expect a title "to contain" a substring.
-  await expect(page).toHaveTitle(/Playwright/);
-});
+  // กรอกชื่อ
+  await page.locator('input[name="name"]').fill('Natth');
 
-test('get started link', async ({ page }) => {
-  await page.goto('https://playwright.dev/');
+  // กรอกอายุ
+  await page.locator('input[name="age"]').fill('26');
 
-  // Click the get started link.
-  await page.getByRole('link', { name: 'Get started' }).click();
+  // toggle switch/checkbox
+  const subscribeSwitch = page.locator('input[name="subscribe"]');
+  if (!(await subscribeSwitch.isChecked())) {
+    await subscribeSwitch.check();
+  }
 
-  // Expects page to have a heading with the name of Installation.
-  await expect(page.getByRole('heading', { name: 'Installation' })).toBeVisible();
+  // กดปุ่ม Submit
+  await page.locator('button[type="submit"]').click();
+
+  // ตรวจสอบข้อความหลัง submit (สมมติมี div#result)
+  await expect(page.locator('#result')).toHaveText(/Natth/);
+
+  // กดปุ่ม Reset
+  await page.locator('button[type="reset"]').click();
+
+  // ตรวจสอบว่าฟิลด์ว่างทั้งหมด
+  await expect(page.locator('input[name="name"]')).toHaveValue('');
+  await expect(page.locator('input[name="age"]')).toHaveValue('');
+  await expect(subscribeSwitch).not.toBeChecked();
 });
